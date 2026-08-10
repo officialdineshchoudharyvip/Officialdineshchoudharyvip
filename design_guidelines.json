@@ -1,0 +1,160 @@
+{
+  "app_name": "InstaBloom",
+  "personality": "4 Tactile / Playful LIGHT",
+  "personality_one_liner": "A friendly, touchable, and highly visual creation space with soft pastel grounding and vibrant floral accents.",
+  "color": {
+    "surface": { "light": "#FFF9F7", "dark": "#1C191A" },
+    "onSurface": { "light": "#1F1A1C", "dark": "#F7F2F1" },
+    "surfaceSecondary": { "light": "#FFFFFF", "dark": "#292526" },
+    "onSurfaceSecondary": { "light": "#1F1A1C", "dark": "#F7F2F1" },
+    "surfaceTertiary": { "light": "#FEE7E0", "dark": "#382B2D" },
+    "onSurfaceTertiary": { "light": "#3D211B", "dark": "#F7F2F1" },
+    "surfaceInverse": { "light": "#1F1A1C", "dark": "#F7F2F1" },
+    "onSurfaceInverse": { "light": "#FFF9F7", "dark": "#1C191A" },
+    "brand": { "light": "#F05A7E", "dark": "#F27A97" },
+    "brandPrimary": { "light": "#F05A7E", "dark": "#F27A97" },
+    "onBrandPrimary": { "light": "#FFFFFF", "dark": "#1A0409" },
+    "brandSecondary": { "light": "#FFB3A7", "dark": "#D95470" },
+    "onBrandSecondary": { "light": "#4A151B", "dark": "#FFFFFF" },
+    "brandTertiary": { "light": "#FFD3CB", "dark": "#5C2834" },
+    "onBrandTertiary": { "light": "#5C151B", "dark": "#FAD3DC" },
+    "success": { "light": "#3C8754", "dark": "#4A9E66" },
+    "onSuccess": { "light": "#FFFFFF", "dark": "#FFFFFF" },
+    "warning": { "light": "#D97706", "dark": "#EAB308" },
+    "onWarning": { "light": "#FFFFFF", "dark": "#1A1A1A" },
+    "error": { "light": "#D94040", "dark": "#F87171" },
+    "onError": { "light": "#FFFFFF", "dark": "#1A1A1A" },
+    "border": { "light": "#F0E1DC", "dark": "#3D3335" },
+    "borderStrong": { "light": "#D6B5AF", "dark": "#5C494C" },
+    "divider": { "light": "#F0E1DC", "dark": "#3D3335" }
+  },
+  "typography": {
+    "displayFontFamily": "Figtree",
+    "textFontFamily": "Nunito",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous touch targets and comfortable margins. Elements should feel slightly buoyant and modular.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": 2,
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Floating action rails in the editor screen",
+      "Sticky headers when scrolling through templates",
+      "Tab bar base when scrolling Gallery behind it"
+    ],
+    "dont's": [
+      "Don't blur dense tool panels in the editor, keep them readable.",
+      "No blur on empty state illustrations"
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Home",
+      "purpose": "A welcoming dashboard to discover floral templates and quickly jump into creation modes.",
+      "states": {
+        "loading": "Skeleton grids for templates with a central brand-colored spinner.",
+        "empty": "No templates available yet - large playful floral SVG.",
+        "error": "Failed to load templates. 'Oops, the flowers didn't bloom' with a retry button."
+      },
+      "layout": "Large hero section with 2 side-by-side chunky action cards ('AI Bloom', 'Photo Edit'). Below, a masonry or 2-column grid of trending floral templates. Use surfaceSecondary for cards with shadow tier 2 on a surface background."
+    },
+    {
+      "name": "Editor",
+      "purpose": "Full-screen canvas for applying frames, stickers, and editing photos.",
+      "states": {
+        "loading": "Loading canvas assets...",
+        "empty": "No photo selected. Prominent buttons to 'Open Camera' or 'Gallery' centered on screen.",
+        "error": "Failed to load image. Retry button."
+      },
+      "layout": "Image preview takes up maximum safe area. Top floating glass header for 'Cancel' and 'Share'. Bottom features a horizontal scrolling tool rail (Crop, Frames, Stickers, Text). Selecting a tool opens a contextual @gorhom/bottom-sheet or rail directly above the tabs for detailed choices."
+    },
+    {
+      "name": "AIGenerator",
+      "purpose": "Prompt-based AI flower background and post generation.",
+      "states": {
+        "loading": "Large pulsing placeholder with a playful 'Planting seeds...' text and spinner.",
+        "empty": "Input prompt is empty. Display inspiration chips.",
+        "error": "AI generation failed. Prompt user to try a different phrase."
+      },
+      "layout": "Large text input area at the top with surfaceTertiary background. Below it, a horizontally scrolling row of style chips (Watercolor, Minimal, Vintage). A massive, pill-shaped 'Generate' CTA pinned to the bottom (sticky thumb zone)."
+    },
+    {
+      "name": "Gallery",
+      "purpose": "Showcase user's saved edits and generated floral images.",
+      "states": {
+        "loading": "Skeleton image grid.",
+        "empty": "Playful illustration of an empty vase. 'Your garden is empty. Start creating!' with a primary CTA.",
+        "error": "Could not load gallery."
+      },
+      "layout": "Segmented control at the top (Edited vs AI Generated). 2-column grid of images. Each image card has a soft shadow. Full bleed image inside the card container."
+    }
+  ],
+  "images": {
+    "template_1": {
+      "url": "https://images.unsplash.com/photo-1686177991278-b7a3c37739d4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwzfHxiZWF1dGlmdWwlMjBmbG9yYWwlMjBJbnN0YWdyYW0lMjBwb3N0JTIwdGVtcGxhdGVzfGVufDB8fHx8MTc4NjM5NTMxOXww&ixlib=rb-4.1.0&q=85",
+      "alt": "A white sheet of paper surrounded by vibrant flowers"
+    },
+    "template_2": {
+      "url": "https://images.unsplash.com/photo-1579591040245-1b25289ff4c5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxiZWF1dGlmdWwlMjBmbG9yYWwlMjBJbnN0YWdyYW0lMjBwb3N0JTIwdGVtcGxhdGVzfGVufDB8fHx8MTc4NjM5NTMxOXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Pink and green flower painting"
+    },
+    "minimal_flower": {
+      "url": "https://images.unsplash.com/photo-1494058303350-0bd5a9ecc5d3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NjZ8MHwxfHNlYXJjaHwyfHxtaW5pbWFsaXN0JTIwZmxvd2VyJTIwcGhvdG9ncmFwaHl8ZW58MHx8fHwxNzg1MTg0MDcyfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "White petaled flower minimalist photography"
+    },
+    "pastel_flower": {
+      "url": "https://images.unsplash.com/photo-1616285720779-9e597265df0c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxwYXN0ZWwlMjBwaW5rJTIwc3ByaW5nJTIwZmxvd2Vyc3xlbnwwfHx8fDE3ODYzOTUzMTh8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Pastel pink spring flowers in tilt shift lens"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the color palette. Blue and purple hues are completely banned. Use the defined coral/peach/charcoal combinations.",
+    "Implement the 'Tactile / Playful' layout: use generous padding, chunky pill buttons (radius pill), and soft shadows (tier 2) on cards.",
+    "Ensure sticky buttons at the bottom for major actions (e.g., 'Generate' in AI screen) use the thumb-zone pattern, layered above scrolling content.",
+    "The Editor screen MUST have a full-screen canvas preview with safe-area spacing. Overlay floating glass headers/footers for tools.",
+    "Any text displayed on top of background images MUST use the gradient-to-dark scrim pattern (transparent to >=70% surfaceInverse) to guarantee contrast.",
+    "Do NOT use emojis anywhere in the system UI (e.g. empty states, button icons). Use Phosphor icons or real floral SVGs/illustrations.",
+    "Do NOT use pure white cards on a pure white background. Ensure contrast between surface and surfaceSecondary."
+  ],
+  "haptics": {
+    "button_press": "light",
+    "tool_select": "medium",
+    "generate_success": "success",
+    "tab_switch": "selection"
+  }
+}

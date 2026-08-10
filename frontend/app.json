@@ -1,0 +1,67 @@
+{
+  "expo": {
+    "name": "frontend",
+    "slug": "frontend",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "frontend",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.emergent.instabloomcreator.ucemgi",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Take photos to decorate with flowers",
+        "NSPhotoLibraryUsageDescription": "Choose photos to add floral designs",
+        "NSPhotoLibraryAddUsageDescription": "Save your floral creations to Photos"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#000000"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.emergent.instabloomcreator.ucemgi",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES"
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Choose photos to add floral designs",
+          "cameraPermission": "Take photos to decorate with flowers"
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Access photos to add floral designs",
+          "savePhotosPermission": "Save your floral creations to Photos"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-image.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#000000"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
