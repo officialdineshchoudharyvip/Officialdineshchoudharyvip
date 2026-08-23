@@ -30,7 +30,6 @@ import {
   MagicWand,
   Trash,
   Camera,
-  Flower,
   FlowerLotus,
   FlowerTulip,
   Butterfly,
@@ -38,6 +37,18 @@ import {
   Heart,
   Sparkle,
   Sun,
+  Plant,
+  Tree,
+  HeartStraight,
+  Star,
+  Crown,
+  Rainbow,
+  Cherries,
+  Signature,
+  Palette,
+  CheckCircle,
+  CircleIcon as Circle,
+  Flower,
 } from "phosphor-react-native";
 
 import { api } from "@/src/api";
@@ -45,6 +56,7 @@ import { takeEditorSeed } from "@/src/editorStore";
 import { saveToDevice, shareUri, uriToBase64 } from "@/src/media";
 import { DraggableItem } from "@/src/components/DraggableItem";
 import { useToast } from "@/src/components/Toast";
+import { storage } from "@/src/utils/storage";
 import { colors, fonts, radius, shadow, spacing } from "@/src/theme";
 
 const { width } = Dimensions.get("window");
@@ -69,16 +81,61 @@ const FRAMES = [
   { key: "cream", label: "Cream", w: 16, c: "#FFF3EE" },
 ];
 
-const STICKERS: { key: string; Comp: any; color: string }[] = [
-  { key: "flower", Comp: Flower, color: colors.brand },
-  { key: "lotus", Comp: FlowerLotus, color: "#E76BA0" },
-  { key: "tulip", Comp: FlowerTulip, color: colors.brandSecondary },
-  { key: "butterfly", Comp: Butterfly, color: colors.gold },
-  { key: "leaf", Comp: Leaf, color: colors.success },
-  { key: "heart", Comp: Heart, color: colors.brand },
-  { key: "sparkle", Comp: Sparkle, color: colors.gold },
-  { key: "sun", Comp: Sun, color: "#F5A623" },
+const STICKER_PACKS: {
+  id: string;
+  label: string;
+  items: { key: string; Comp: any; color: string }[];
+}[] = [
+  {
+    id: "flowers",
+    label: "Flowers",
+    items: [
+      { key: "flower", Comp: Flower, color: colors.brand },
+      { key: "lotus", Comp: FlowerLotus, color: "#E76BA0" },
+      { key: "tulip", Comp: FlowerTulip, color: colors.brandSecondary },
+      { key: "cherries", Comp: Cherries, color: colors.brand },
+    ],
+  },
+  {
+    id: "nature",
+    label: "Nature",
+    items: [
+      { key: "leaf", Comp: Leaf, color: colors.success },
+      { key: "plant", Comp: Plant, color: colors.success },
+      { key: "tree", Comp: Tree, color: "#5A8F4E" },
+      { key: "sun", Comp: Sun, color: "#F5A623" },
+      { key: "rainbow", Comp: Rainbow, color: colors.brand },
+    ],
+  },
+  {
+    id: "love",
+    label: "Love & Fun",
+    items: [
+      { key: "heart", Comp: Heart, color: colors.brand },
+      { key: "heart2", Comp: HeartStraight, color: "#E23E57" },
+      { key: "sparkle", Comp: Sparkle, color: colors.gold },
+      { key: "star", Comp: Star, color: colors.gold },
+      { key: "crown", Comp: Crown, color: colors.gold },
+      { key: "butterfly", Comp: Butterfly, color: colors.gold },
+    ],
+  },
 ];
+
+const STICKER_MAP: Record<string, any> = {};
+STICKER_PACKS.forEach((p) => p.items.forEach((it) => (STICKER_MAP[it.key] = it.Comp)));
+
+const STICKER_COLORS = [
+  "#F05A7E",
+  "#E76BA0",
+  "#FFB3A7",
+  "#E7B96B",
+  "#F5A623",
+  "#3C8754",
+  "#FFFFFF",
+  "#1F1A1C",
+];
+
+const WATERMARK_KEY = "instabloom.watermark.handle";
 
 const TEXT_COLORS = ["#FFFFFF", colors.brand, colors.gold, colors.onSurface, colors.success];
 const CAPTION_PRESETS = [
@@ -98,7 +155,7 @@ const AI_SUGGESTIONS = [
 let idCounter = 0;
 const nextId = () => `item-${idCounter++}`;
 
-type StickerItem = { id: string; kind: "sticker"; typeKey: string };
+type StickerItem = { id: string; kind: "sticker"; typeKey: string; color: string };
 type TextItem = { id: string; kind: "text"; text: string; color: string };
 type Item = StickerItem | TextItem;
 
@@ -124,6 +181,21 @@ export default function Editor() {
   const [aiModal, setAiModal] = useState(false);
   const [aiPrompt, setAiPrompt] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
+
+  const [stickerPack, setStickerPack] = useState(0);
+  const [watermarkModal, setWatermarkModal] = useState(false);
+  const [watermarkOn, setWatermarkOn] = useState(false);
+  const [watermarkHandle, setWatermarkHandle] = useState("");
+
+  useEffect(() => {
+    (async () => {
+      const saved = await storage.getItem(WATERMARK_KEY, "");
+      if (saved) {
+        setWatermarkHandle(saved);
+        setWatermarkOn(true);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     const seed = takeEditorSeed();
@@ -184,11 +256,25 @@ export default function Editor() {
     setBaseBase64(asset.base64 ?? null);
   };
 
-  const addSticker = (typeKey: string) => {
+  const addSticker = (typeKey: string, color: string) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const item: StickerItem = { id: nextId(), kind: "sticker", typeKey };
+    const item: StickerItem = { id: nextId(), kind: "sticker", typeKey, color };
     setItems((prev) => [...prev, item]);
     setSelectedId(item.id);
+  };
+
+  const updateSelectedColor = (color: string) => {
+    if (!selectedId) return;
+    Haptics.selectionAsync();
+    setItems((prev) => prev.map((i) => (i.id === selectedId ? { ...i, color } : i)));
+  };
+
+  const saveWatermark = async () => {
+    const handle = watermarkHandle.trim();
+    setWatermarkHandle(handle);
+    await storage.setItem(WATERMARK_KEY, handle);
+    setWatermarkModal(false);
+    toast.show(watermarkOn && handle ? "Watermark on" : "Watermark updated", "success");
   };
 
   const addText = () => {
@@ -334,8 +420,7 @@ export default function Editor() {
               <Pressable style={StyleSheet.absoluteFill} onPress={() => setSelectedId(null)} />
               {items.map((item) => {
                 if (item.kind === "sticker") {
-                  const def = STICKERS.find((s) => s.key === item.typeKey)!;
-                  const Comp = def.Comp;
+                  const Comp = STICKER_MAP[item.typeKey];
                   return (
                     <DraggableItem
                       key={item.id}
@@ -344,7 +429,7 @@ export default function Editor() {
                       selected={selectedId === item.id}
                       onSelect={() => setSelectedId(item.id)}
                     >
-                      <Comp size={80} color={def.color} weight="fill" />
+                      <Comp size={80} color={item.color} weight="fill" />
                     </DraggableItem>
                   );
                 }
@@ -368,6 +453,11 @@ export default function Editor() {
                     { borderWidth: FRAMES[frame].w, borderColor: FRAMES[frame].c },
                   ]}
                 />
+              )}
+              {watermarkOn && watermarkHandle.trim().length > 0 && (
+                <View pointerEvents="none" style={styles.watermark}>
+                  <Text style={styles.watermarkText}>{watermarkHandle}</Text>
+                </View>
               )}
             </View>
           </View>
@@ -421,32 +511,88 @@ export default function Editor() {
             </ScrollView>
           )}
           {panel === "stickers" && (
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.optionRow}>
-              {STICKERS.map((s) => {
-                const Comp = s.Comp;
-                return (
+            <View style={styles.stickerPanel}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.packRow}
+              >
+                {STICKER_PACKS.map((p, i) => (
                   <Pressable
-                    key={s.key}
-                    testID={`sticker-${s.key}`}
-                    onPress={() => addSticker(s.key)}
-                    style={styles.stickerChip}
+                    key={p.id}
+                    testID={`sticker-pack-${p.id}`}
+                    onPress={() => {
+                      Haptics.selectionAsync();
+                      setStickerPack(i);
+                    }}
+                    style={[styles.packChip, stickerPack === i && styles.packChipActive]}
                   >
-                    <Comp size={30} color={s.color} weight="fill" />
+                    <Text style={[styles.packText, stickerPack === i && styles.packTextActive]}>
+                      {p.label}
+                    </Text>
                   </Pressable>
-                );
-              })}
+                ))}
+              </ScrollView>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.optionRow}
+              >
+                {STICKER_PACKS[stickerPack].items.map((s) => {
+                  const Comp = s.Comp;
+                  return (
+                    <Pressable
+                      key={s.key}
+                      testID={`sticker-${s.key}`}
+                      onPress={() => addSticker(s.key, s.color)}
+                      style={styles.stickerChip}
+                    >
+                      <Comp size={30} color={s.color} weight="fill" />
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </View>
+          )}
+
+          {selectedId && !panel && (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.optionRow}
+            >
+              <View style={styles.colorLabel} pointerEvents="none">
+                <Palette size={18} color={colors.muted} weight="fill" />
+              </View>
+              {STICKER_COLORS.map((c) => (
+                <Pressable
+                  key={c}
+                  testID={`recolor-${c}`}
+                  onPress={() => updateSelectedColor(c)}
+                  style={[styles.colorDot, { backgroundColor: c }]}
+                />
+              ))}
             </ScrollView>
           )}
 
           {/* Tool rail */}
-          <View style={[styles.toolRail, { paddingBottom: insets.bottom + spacing.sm }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.toolRail}
+            contentContainerStyle={[
+              styles.toolRailContent,
+              { paddingBottom: insets.bottom + spacing.sm },
+            ]}
+          >
             <Tool icon={<ImageSquare size={24} color={colors.onSurface} />} label="Photo" onPress={() => pickFrom("library")} testID="tool-photo" />
             <Tool icon={<Sliders size={24} color={panel === "filters" ? colors.brand : colors.onSurface} />} label="Filter" active={panel === "filters"} onPress={() => setPanel(panel === "filters" ? null : "filters")} testID="tool-filter" />
             <Tool icon={<FrameCorners size={24} color={panel === "frames" ? colors.brand : colors.onSurface} />} label="Frame" active={panel === "frames"} onPress={() => setPanel(panel === "frames" ? null : "frames")} testID="tool-frame" />
             <Tool icon={<Flower size={24} color={panel === "stickers" ? colors.brand : colors.onSurface} weight={panel === "stickers" ? "fill" : "regular"} />} label="Sticker" active={panel === "stickers"} onPress={() => setPanel(panel === "stickers" ? null : "stickers")} testID="tool-sticker" />
             <Tool icon={<TextT size={24} color={colors.onSurface} />} label="Text" onPress={() => { setPanel(null); setTextModal(true); }} testID="tool-text" />
+            <Tool icon={<Signature size={24} color={watermarkOn ? colors.brand : colors.onSurface} weight={watermarkOn ? "fill" : "regular"} />} label="Mark" active={watermarkOn} onPress={() => { setPanel(null); setWatermarkModal(true); }} testID="tool-watermark" />
             <Tool icon={<MagicWand size={24} color={colors.brand} weight="fill" />} label="AI" onPress={() => { setPanel(null); setAiModal(true); }} testID="tool-ai" />
-          </View>
+          </ScrollView>
         </>
       )}
 
@@ -532,6 +678,44 @@ export default function Editor() {
               ) : (
                 <Text style={styles.sheetCtaText}>Apply AI magic</Text>
               )}
+            </Pressable>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Watermark modal */}
+      <Modal visible={watermarkModal} transparent animationType="slide" onRequestClose={() => setWatermarkModal(false)}>
+        <KeyboardAvoidingView style={styles.modalBg} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+          <Pressable style={StyleSheet.absoluteFill} onPress={() => setWatermarkModal(false)} />
+          <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }]}>
+            <View style={styles.aiHead}>
+              <Signature size={22} color={colors.brand} weight="fill" />
+              <Text style={styles.sheetTitle}>Your watermark</Text>
+            </View>
+            <Text style={styles.sheetSub}>Add your handle so shared posts credit your page</Text>
+            <TextInput
+              testID="watermark-input"
+              value={watermarkHandle}
+              onChangeText={setWatermarkHandle}
+              placeholder="@yourhandle"
+              placeholderTextColor={colors.muted}
+              autoCapitalize="none"
+              style={[styles.sheetInput, { minHeight: 52 }]}
+            />
+            <Pressable
+              style={styles.toggleRow}
+              onPress={() => setWatermarkOn((v) => !v)}
+              testID="watermark-toggle"
+            >
+              {watermarkOn ? (
+                <CheckCircle size={26} color={colors.brand} weight="fill" />
+              ) : (
+                <Circle size={26} color={colors.muted} weight="regular" />
+              )}
+              <Text style={styles.toggleText}>Show watermark on my photos</Text>
+            </Pressable>
+            <Pressable style={styles.sheetCta} onPress={saveWatermark} testID="watermark-save-button">
+              <Text style={styles.sheetCtaText}>Save watermark</Text>
             </Pressable>
           </View>
         </KeyboardAvoidingView>
@@ -650,15 +834,59 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
+  stickerPanel: {},
+  packRow: { gap: spacing.sm, paddingHorizontal: spacing.lg, paddingTop: spacing.md, alignItems: "center" },
+  packChip: {
+    height: 34,
+    justifyContent: "center",
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceTertiary,
+    flexShrink: 0,
+  },
+  packChipActive: { backgroundColor: colors.brand },
+  packText: { fontFamily: fonts.bodySemi, fontSize: 13, color: colors.onSurfaceTertiary },
+  packTextActive: { color: colors.onBrandPrimary },
+  colorLabel: { justifyContent: "center", paddingRight: spacing.xs },
+  colorDot: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    flexShrink: 0,
+  },
+  watermark: {
+    position: "absolute",
+    right: spacing.md,
+    bottom: spacing.md,
+    backgroundColor: "rgba(31,26,28,0.35)",
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.sm,
+  },
+  watermarkText: {
+    fontFamily: fonts.bodyBold,
+    fontSize: 13,
+    color: "#FFFFFF",
+    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowRadius: 3,
+  },
+  toggleRow: { flexDirection: "row", alignItems: "center", gap: spacing.md, paddingVertical: spacing.xs },
+  toggleText: { fontFamily: fonts.bodySemi, fontSize: 15, color: colors.onSurface },
 
   toolRail: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
     backgroundColor: colors.surfaceSecondary,
     borderTopColor: colors.border,
     borderTopWidth: 1,
+    flexGrow: 0,
+  },
+  toolRailContent: {
+    flexDirection: "row",
+    gap: spacing.xl,
+    paddingHorizontal: spacing.xl,
+    paddingTop: spacing.md,
+    alignItems: "flex-start",
   },
   tool: { alignItems: "center", gap: spacing.xs, minWidth: 48 },
   toolLabel: { fontFamily: fonts.bodySemi, fontSize: 11, color: colors.muted },

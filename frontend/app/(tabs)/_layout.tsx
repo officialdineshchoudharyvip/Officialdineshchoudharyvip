@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { House, MagicWand, GridFour } from "phosphor-react-native";
+import { House, MagicWand, GridFour, TrendUp } from "phosphor-react-native";
 import { Platform } from "react-native";
 
 import { colors, fonts } from "@/src/theme";
@@ -36,6 +36,15 @@ export default function TabsLayout() {
           title: "AI Bloom",
           tabBarIcon: ({ color, focused }) => (
             <MagicWand size={26} color={color} weight={focused ? "fill" : "regular"} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="grow"
+        options={{
+          title: "Grow",
+          tabBarIcon: ({ color, focused }) => (
+            <TrendUp size={26} color={color} weight={focused ? "fill" : "regular"} />
           ),
         }}
       />
